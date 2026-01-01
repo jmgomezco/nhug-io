@@ -8,14 +8,19 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "node scripts/generate-favicon.js && vite build",
+    "preview": "vite preview",
+    "generate-favicon": "node scripts/generate-favicon.js"
   },
   "dependencies": {
     "vue": "^3.5.26"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@vitejs/plugin-vue": "^6.0.3",
+    "sharp": "^0.34.5",
+    "text-to-svg": "^3.1.5",
+    "to-ico": "^1.1.5",
     "vite": "^7.3.0",
     "vite-plugin-vue-devtools": "^8.0.5"
   }
