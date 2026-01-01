@@ -36,4 +36,18 @@ npm run dev
 ```sh
 npm run build
 ```
-# nhug-io
+
+## Favicon Generation
+
+This project includes dynamic favicon generation. For detailed documentation on how the favicon system works, including troubleshooting and customization options, see:
+
+📄 **[FAVICON_INTEGRATION.md](./FAVICON_INTEGRATION.md)**
+
+### Quick Start
+
+Generate the favicon manually:
+```sh
+npm run generate-favicon
+```
+
+The favicon is automatically generated during the build process (`npm run build`).
