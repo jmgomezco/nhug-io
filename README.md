@@ -51,5 +51,3 @@ npm run generate-favicon
 ```
 
 The favicon is automatically generated during the build process (`npm run build`).
-
-# nhug-io
