@@ -1,6 +1,6 @@
 # Integración de Favicons en Vite
 
-Esta guía detalla cómo integrar favicons dinámicos en un proyecto configurado con Vite, incluyendo la generación dinámica mediante scripts y su integración en el flujo de construcción.
+Esta guía detalla cómo integrar favicons en un proyecto configurado con Vite, incluyendo la generación mediante scripts y su integración en el flujo de construcción.
 
 ## Tabla de Contenidos
 
@@ -149,7 +149,7 @@ npm install sharp
 
 ---
 
-## 3. Generación Dinámica del Favicon
+## 3. Generación del Favicon
 
 ### Script de Generación
 
@@ -166,39 +166,39 @@ import TextToSVG from 'text-to-svg';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-async function createFaviconSVG(backgroundColor, textColor) {
+async function createFaviconSVG() {
   const fontPath = join(__dirname, 'Audiowide-Regular.ttf');
   
-  // Verificar que el archivo de fuente exista
+  // Check if font file exists
   try {
     await readFile(fontPath);
   } catch (error) {
-    throw new Error(`Font file not found at ${fontPath}. Please ensure Audiowide-Regular.ttf is present in the scripts directory.`);
+    throw new Error(`Font file not found at ${fontPath}`);
   }
   
   const textToSVG = TextToSVG.loadSync(fontPath);
   
-  // Generar el path SVG para "n"
+  // Generate the text path for "n" with Audiowide font
   const textSVG = textToSVG.getSVG('n', {
     x: 0,
     y: 0,
     fontSize: 180,
     anchor: 'center',
-    attributes: { fill: textColor }
+    attributes: { fill: '#ffffff' }
   });
   
-  // Extraer el path del SVG de texto
+  // Extract path data
   const pathMatch = textSVG.match(/<path[^>]*d="([^"]*)"[^>]*>/);
   if (!pathMatch || !pathMatch[1]) {
-    throw new Error('Failed to extract path data from generated SVG text');
+    throw new Error('Failed to extract path data');
   }
   const pathData = pathMatch[1];
   
-  // Crear SVG completo con círculo y texto centrado
+  // Create minimalist SVG with pure black background and white "n"
   const svg = `<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="128" cy="128" r="128" fill="${backgroundColor}"/>
+  <circle cx="128" cy="128" r="128" fill="#000000"/>
   <g transform="translate(128, 158)">
-    <path d="${pathData}" fill="${textColor}"/>
+    <path d="${pathData}" fill="#ffffff"/>
   </g>
 </svg>`;
   
@@ -209,32 +209,25 @@ async function generateFavicon() {
   try {
     console.log('Generating favicon...');
     
-    // Crear SVG para estado normal
-    const svgBuffer = await createFaviconSVG('#122037', '#ffffff');
+    const svgBuffer = await createFaviconSVG();
+    await writeFile(join(__dirname, 'favicon.svg'), svgBuffer);
     
-    // Guardar archivos SVG para referencia
-    await writeFile(join(__dirname, 'favicon-normal.svg'), svgBuffer);
-    await writeFile(join(__dirname, 'favicon-focus.svg'), await createFaviconSVG('#414c5e', '#888f9b'));
-    
-    // Convertir SVG a PNG en diferentes tamaños
+    // Convert to PNG at different sizes
     const sizes = [16, 32, 48];
     const pngBuffers = await Promise.all(
       sizes.map(size =>
-        sharp(svgBuffer)
-          .resize(size, size)
-          .png()
-          .toBuffer()
+        sharp(svgBuffer).resize(size, size).png().toBuffer()
       )
     );
     
-    // Convertir PNGs a ICO
+    // Convert PNGs to ICO
     const icoBuffer = await toIco(pngBuffers);
     
-    // Escribir en la carpeta public
+    // Write to public folder
     const outputPath = join(__dirname, '..', 'public', 'favicon.ico');
     await writeFile(outputPath, icoBuffer);
     
-    console.log('✓ Favicon generated successfully at public/favicon.ico');
+    console.log('✓ Favicon generated successfully');
   } catch (error) {
     console.error('Error generating favicon:', error);
     process.exit(1);
@@ -244,27 +237,23 @@ async function generateFavicon() {
 generateFavicon();
 ```
 
-### Características del Favicon Generado
+### Características del Favicon
 
-#### Estados Dinámicos
+#### Diseño Minimalista
 
-El script genera dos variantes del favicon:
+El favicon utiliza un diseño simple y eficiente:
 
-1. **Estado Normal (`favicon-normal.svg`)**:
-   - Fondo: `#122037` (azul oscuro)
-   - Texto: `#ffffff` (blanco)
-   - Uso: Vista predeterminada del favicon
-
-2. **Estado Focus (`favicon-focus.svg`)**:
-   - Fondo: `#414c5e` (gris azulado)
-   - Texto: `#888f9b` (gris claro)
-   - Uso: Cuando la pestaña está activa o en focus
+- **Fondo**: `#000000` (negro puro)
+- **Texto**: `#ffffff` (blanco puro)
+- **Fuente**: Audiowide (familia de fuentes moderna y legible)
+- **Letra**: "n" en minúscula
+- **Tamaño del círculo**: Máximo permitido (radio 128 en canvas 256x256)
 
 #### Proceso de Generación
 
 1. **Carga de Fuente**: Lee la fuente `Audiowide-Regular.ttf` desde el directorio `scripts/`
 2. **Conversión de Texto a SVG**: Convierte la letra "n" en un path SVG
-3. **Creación de SVG**: Combina un círculo de fondo con el texto centrado
+3. **Creación de SVG**: Combina un círculo negro de fondo con el texto blanco centrado
 4. **Redimensionamiento**: Genera PNG en 3 tamaños (16x16, 32x32, 48x48)
 5. **Conversión a ICO**: Combina los PNG en un único archivo `.ico`
 6. **Guardado**: Escribe el archivo en `public/favicon.ico`
@@ -465,8 +454,7 @@ nhug-io/
 ├── scripts/
 │   ├── generate-favicon.js   # Script de generación
 │   ├── Audiowide-Regular.ttf # Fuente para el texto
-│   ├── favicon-normal.svg    # SVG estado normal (referencia)
-│   └── favicon-focus.svg     # SVG estado focus (referencia)
+│   └── favicon.svg           # SVG generado (referencia)
 ├── src/
 │   └── main.js               # Punto de entrada de Vue
 ├── index.html                # HTML principal con <link> al favicon
@@ -492,14 +480,9 @@ nhug-io/
 - **Propósito**: Fuente para generar el texto "n"
 - **Requerido**: Sí, el script falla sin él
 
-#### `scripts/favicon-normal.svg`
+#### `scripts/favicon.svg`
 - **Generado por**: Script de generación
-- **Propósito**: Referencia visual del estado normal
-- **No usado**: En producción (solo referencia)
-
-#### `scripts/favicon-focus.svg`
-- **Generado por**: Script de generación
-- **Propósito**: Referencia visual del estado focus
+- **Propósito**: Referencia visual del favicon
 - **No usado**: En producción (solo referencia)
 
 ### Archivos Generados Durante el Build
@@ -523,15 +506,21 @@ Sharp es más rápido y eficiente que alternativas como ImageMagick o GraphicsMa
 
 ### ¿Puedo cambiar los colores del favicon?
 
-Sí, modifica los parámetros en `scripts/generate-favicon.js`:
+Sí, modifica los valores en `scripts/generate-favicon.js`:
 
 ```javascript
-// Estado normal
-const svgBuffer = await createFaviconSVG('#122037', '#ffffff');
-
-// Estado focus
-await createFaviconSVG('#414c5e', '#888f9b')
+// Cambiar colores en la función createFaviconSVG
+const svg = `<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="128" cy="128" r="128" fill="#000000"/>
+  <g transform="translate(128, 158)">
+    <path d="${pathData}" fill="#ffffff"/>
+  </g>
+</svg>`;
 ```
+
+El diseño actual utiliza:
+- Fondo: `#000000` (negro puro)
+- Texto: `#ffffff` (blanco puro)
 
 ### ¿Puedo usar otra fuente?
 
