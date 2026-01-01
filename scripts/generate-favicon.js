@@ -15,7 +15,7 @@ async function createFaviconSVG() {
   try {
     await readFile(fontPath);
   } catch (error) {
-    throw new Error(`Font file not found at ${fontPath}. Please ensure Audiowide-Regular.ttf is present in the scripts directory.`);
+    throw new Error(`Font file not found: ${fontPath}`);
   }
   
   const textToSVG = TextToSVG.loadSync(fontPath);
@@ -32,7 +32,7 @@ async function createFaviconSVG() {
   // Extract the path from the text SVG
   const pathMatch = textSVG.match(/<path[^>]*d="([^"]*)"[^>]*>/);
   if (!pathMatch || !pathMatch[1]) {
-    throw new Error('Failed to extract path data from generated SVG text');
+    throw new Error('Failed to extract path from SVG');
   }
   const pathData = pathMatch[1];
   
