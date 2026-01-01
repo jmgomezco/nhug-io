@@ -54,8 +54,8 @@
   justify-content: center;
   width: 55px;
   height: 55px;
-  /* Color de fondo oscuro */
-  background-color: #122037;
+  /* Color de fondo transparente para heredar del contenedor */
+  background-color: transparent;
   /* Borde blanco puro de 1px */
   border: 1px solid #ffffff;
   /* Sin decoración de enlace */

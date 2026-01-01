@@ -20,7 +20,7 @@ const props = defineProps({
   font-size: clamp(16px, 4vw, 30px);
   font-weight: 900;
   color: #fff;
-  background: #122037;
+  background: transparent;
   padding: 10px 20px;
   line-height: 1.3;
   letter-spacing: 1.2px;
@@ -31,8 +31,7 @@ const props = defineProps({
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 40px;
-  margin-left: 0;
+  margin: 0;
 }
 
 @media (max-width: 600px) {
@@ -40,7 +39,6 @@ const props = defineProps({
     min-width: 80px;
     font-size: clamp(12px, 7vw, 22px);
     padding: 6px 10px;
-    margin-bottom: 18px;
   }
 }
 </style>
