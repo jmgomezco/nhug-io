@@ -10,6 +10,14 @@ const __dirname = dirname(__filename);
 
 async function createFaviconSVG(backgroundColor, textColor) {
   const fontPath = join(__dirname, 'Audiowide-Regular.ttf');
+  
+  // Check if font file exists
+  try {
+    await readFile(fontPath);
+  } catch (error) {
+    throw new Error(`Font file not found at ${fontPath}. Please ensure Audiowide-Regular.ttf is present in the scripts directory.`);
+  }
+  
   const textToSVG = TextToSVG.loadSync(fontPath);
   
   // Generate the text path for "n"
@@ -23,7 +31,10 @@ async function createFaviconSVG(backgroundColor, textColor) {
   
   // Extract the path from the text SVG
   const pathMatch = textSVG.match(/<path[^>]*d="([^"]*)"[^>]*>/);
-  const pathData = pathMatch ? pathMatch[1] : '';
+  if (!pathMatch || !pathMatch[1]) {
+    throw new Error('Failed to extract path data from generated SVG text');
+  }
+  const pathData = pathMatch[1];
   
   // Create complete SVG with circle and centered text
   const svg = `<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg">
