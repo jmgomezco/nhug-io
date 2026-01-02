@@ -19,8 +19,8 @@ const props = defineProps({
   font-family: 'Audiowide', sans-serif;
   font-size: clamp(16px, 4vw, 30px);
   font-weight: 900;
-  color: #122037;
-  background: transparent;
+  color: #FFFFFF;
+  background: #122037;
   padding: 10px 20px;
   line-height: 1.3;
   letter-spacing: 1.2px;
