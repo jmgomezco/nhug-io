@@ -18,6 +18,8 @@ const handleLogin = () => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+
 /* Contenedor del botón - cuadrado exacto, igual que BotonSobre */
 .boton-login {
   display: flex;
@@ -31,7 +33,7 @@ const handleLogin = () => {
   border: 2px solid #122037;
   /* Fuente comercial reconocida para aplicaciones de login */
   font-family: 'Roboto', 'Arial', 'Helvetica', sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: #122037;
   /* Sin decoración de botón por defecto */
