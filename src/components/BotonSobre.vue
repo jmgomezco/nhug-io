@@ -16,7 +16,7 @@
         width="20" 
         height="14" 
         fill="none" 
-        stroke="#122037" 
+        stroke="#FFFFFF" 
         stroke-width="3"
       />
       <!-- Línea diagonal izquierda (solapa) -->
@@ -25,7 +25,7 @@
         y1="5" 
         x2="12" 
         y2="13" 
-        stroke="#122037" 
+        stroke="#FFFFFF" 
         stroke-width="3"
       />
       <!-- Línea diagonal derecha (solapa) -->
@@ -34,7 +34,7 @@
         y1="5" 
         x2="12" 
         y2="13" 
-        stroke="#122037" 
+        stroke="#FFFFFF" 
         stroke-width="3"
       />
     </svg>
@@ -54,10 +54,10 @@
   justify-content: center;
   width: 55px;
   height: 55px;
-  /* Color de fondo transparente para heredar del contenedor */
-  background-color: transparent;
-  /* Borde oscuro de 1px para contrastar con fondo claro */
-  border: 1px solid #122037;
+  /* Color de fondo oscuro */
+  background-color: #122037;
+  /* Borde blanco para contrastar con fondo oscuro */
+  border: 1px solid #FFFFFF;
   /* Sin decoración de enlace */
   text-decoration: none;
   /* Cursor de puntero */

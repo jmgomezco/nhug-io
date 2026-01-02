@@ -17,9 +17,9 @@ import BotonSobre from './BotonSobre.vue'
 </script>
 
 <style scoped>
-/* Contenedor principal con color de fondo #D3D3D3 */
+/* Contenedor principal con color de fondo #122037 */
 .container-inicio {
-  background-color: #D3D3D3;
+  background-color: #122037;
   width: 100%;
   padding: 20px;
   box-sizing: border-box;

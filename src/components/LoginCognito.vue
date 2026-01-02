@@ -27,15 +27,15 @@ const handleLogin = () => {
   justify-content: center;
   width: 55px;
   height: 55px;
-  /* Color de fondo transparente para heredar del contenedor */
-  background-color: transparent;
-  /* Borde oscuro de 2px para contrastar con fondo claro #D3D3D3 */
-  border: 2px solid #122037;
+  /* Color de fondo oscuro */
+  background-color: #122037;
+  /* Borde blanco de 1px */
+  border: 1px solid #FFFFFF;
   /* Fuente comercial reconocida para aplicaciones de login */
   font-family: 'Roboto', 'Arial', 'Helvetica', sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #122037;
+  color: #FFFFFF;
   /* Sin decoración de botón por defecto */
   text-decoration: none;
   /* Cursor de puntero */
