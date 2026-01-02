@@ -16,7 +16,7 @@
         width="20" 
         height="14" 
         fill="none" 
-        stroke="#ffffff" 
+        stroke="#122037" 
         stroke-width="3"
       />
       <!-- Línea diagonal izquierda (solapa) -->
@@ -25,7 +25,7 @@
         y1="5" 
         x2="12" 
         y2="13" 
-        stroke="#ffffff" 
+        stroke="#122037" 
         stroke-width="3"
       />
       <!-- Línea diagonal derecha (solapa) -->
@@ -34,7 +34,7 @@
         y1="5" 
         x2="12" 
         y2="13" 
-        stroke="#ffffff" 
+        stroke="#122037" 
         stroke-width="3"
       />
     </svg>
@@ -56,8 +56,8 @@
   height: 55px;
   /* Color de fondo transparente para heredar del contenedor */
   background-color: transparent;
-  /* Borde blanco puro de 1px */
-  border: 1px solid #ffffff;
+  /* Borde oscuro de 1px para contrastar con fondo claro */
+  border: 1px solid #122037;
   /* Sin decoración de enlace */
   text-decoration: none;
   /* Cursor de puntero */
@@ -69,7 +69,7 @@
 /* Efecto hover - ligero levantamiento */
 .boton-sobre:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 8px rgba(18, 32, 55, 0.2);
 }
 
 /* Efecto activo - presionar */
@@ -81,6 +81,6 @@
 .sobre-icono {
   width: 70%;
   height: 70%;
-  /* Las líneas del SVG ya están definidas como blancas con grosor de 3px */
+  /* Las líneas del SVG ya están definidas como oscuras con grosor de 3px */
 }
 </style>
