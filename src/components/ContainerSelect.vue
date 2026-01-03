@@ -1,96 +1,316 @@
 <template>
   <div class="container-select">
-    <div class="contenido-superior">
-      <slot name="superior">
-        <!-- Contenido superior del contenedor -->
-      </slot>
+      <div class="texto-message">
+        Para tu entrada: <span class="texto-color">{{ texto }}</span> , hemos seleccionado estos candidatos semánticamente cercanos.
+      </div>
+      <div class="codes-wrapper" v-if="candidatos && candidatos.length">
+        <div class="codes-list">
+          <div
+            v-for="(item, idx) in candidatos"
+            :key="item.codigo"
+            class="code-item"
+            :class="{ activo: indiceElegido === idx && codigoGrabado }"
+            @mouseover="indiceHover = idx"
+            @mouseleave="indiceHover = null"
+          >
+            <div class="code-info">
+              <span class="code-number" v-text="String(item.codigo ?? '')"></span>
+              <span class="code-description" v-text="obtenerDescripcion(item.descripcion)"></span>
+            </div>
+            <button
+              class="select-button"
+              type="button"
+              :disabled="codigoGrabado || cargando"
+              @click.stop="elegirCodigo(item, idx)"
+            >
+              Elegir
+            </button>
+          </div>
+        </div>
+      </div>
+
+    <div class="no-codes-message" v-else>
+      <p>No se encontraron códigos para tu entrada.</p>
     </div>
-    <div class="contenido-inferior">
-      <slot name="inferior">
-        <!-- Contenido inferior del contenedor con fondo #C9C8C7 -->
-      </slot>
+
+    <div class="action-buttons">
+      <button
+        class="new-search-button"
+        @click="reiniciar"
+      >
+        Prueba con otro texto
+      </button>
     </div>
+
+    <div class="marca-wrapper">
+      <Marca />
+    </div>
+
+    <transition name="fade">
+      <div
+        v-if="estadoConfirmacion"
+        class="popup-confirm"
+        :class="{
+          success: estadoConfirmacion === 'saving',
+          error: estadoConfirmacion === 'error'
+        }"
+        role="status"
+        aria-live="polite"
+      >
+        <template v-if="estadoConfirmacion === 'saving'">Guardando tu elección</template>
+        <template v-else>Fallo al grabar. Intenta de nuevo.</template>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-/**
- * Componente ContainerSelect
- * 
- * Este componente proporciona un contenedor con dos secciones:
- * - Una sección superior con fondo transparente
- * - Una sección inferior con fondo de color #C9C8C7
- * 
- * DOCUMENTACIÓN DEL CAMBIO DE COLOR:
- * ====================================
- * 
- * Propósito del cambio:
- * - La parte inferior del componente utiliza el color de fondo #C9C8C7 para
- *   crear una separación visual clara entre las diferentes secciones del contenedor.
- * - Este diseño permite organizar el contenido de manera jerárquica, donde la
- *   sección inferior puede contener elementos de selección o información secundaria.
- * 
- * Motivo para seleccionar el color #C9C8C7:
- * - El color #C9C8C7 es un gris cálido y neutral que proporciona un contraste suave
- *   con el fondo principal de la aplicación (#122037 - azul oscuro).
- * - Este tono gris claro (aproximadamente 79% de luminosidad) es:
- *   • Suficientemente claro para destacarse del fondo oscuro
- *   • Lo suficientemente neutro para no competir con otros elementos visuales
- *   • Cálido pero profesional, proporcionando una sensación acogedora sin ser distractor
- * - RGB equivalente: rgb(201, 200, 199) - una mezcla equilibrada de tonos grises
- * 
- * Impacto en el diseño general de la aplicación:
- * - Mejora la jerarquía visual: La división de colores ayuda a los usuarios a
- *   distinguir entre diferentes áreas funcionales del contenedor
- * - Consistencia con el sistema de diseño: El gris neutral complementa el esquema
- *   de colores existente sin introducir elementos discordantes
- * - Accesibilidad mejorada: El contraste entre el fondo oscuro superior y el
- *   fondo gris claro inferior facilita la lectura y la navegación
- * - Flexibilidad: El uso de slots permite que el componente sea reutilizable en
- *   diferentes contextos de la aplicación manteniendo la misma identidad visual
- */
+import { ref, onBeforeUnmount } from 'vue'
+import { API_BASE_URL } from '../constants.js'
+import Marca from './Marca.vue'
+
+const props = defineProps({
+  sessionId: { type: String, required: true },
+  candidatos: { type: Array, required: true },
+  texto: { type: String, default: '' }
+})
+const emit = defineEmits(['reset'])
+const indiceElegido = ref(null)
+const indiceHover = ref(null)
+const estadoConfirmacion = ref(null)
+const cargando = ref(false)
+const codigoGrabado = ref(false)
+let temporizador = null
+
+onBeforeUnmount(() => {
+  if (temporizador) {
+    clearTimeout(temporizador)
+  }
+})
+
+function obtenerDescripcion(desc) {
+  return String(desc ?? '')
+}
+
+function mostrarError() {
+  estadoConfirmacion.value = 'error'
+  cargando.value = false
+  indiceElegido.value = null
+  if (temporizador) clearTimeout(temporizador)
+  temporizador = setTimeout(() => {
+    estadoConfirmacion.value = null
+  }, 1800)
+}
+
+async function elegirCodigo(item, idx) {
+  if (codigoGrabado.value || cargando.value) return
+  
+  indiceElegido.value = idx
+  cargando.value = true
+  estadoConfirmacion.value = 'saving'
+
+  const response = await fetch(`${API_BASE_URL}/select`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionId: props.sessionId,
+      codigo: item.codigo
+    })
+  })
+  
+  if (!response.ok) {
+    throw new Error(`/select request failed with status ${response.status}`)
+  }
+
+  codigoGrabado.value = true
+
+  if (temporizador) clearTimeout(temporizador)
+  temporizador = setTimeout(() => {
+    estadoConfirmacion.value = null
+    cargando.value = false
+    emit('reset')
+  }, 750)
+}
+
+function reiniciar() {
+  indiceElegido.value = null
+  codigoGrabado.value = false
+  estadoConfirmacion.value = null
+  cargando.value = false
+  if (temporizador) clearTimeout(temporizador)
+  emit('reset')
+}
 </script>
 
 <style scoped>
-/* Contenedor principal del componente */
 .container-select {
-  width: 100%;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  max-width: clamp(780px, 92vw, 1200px);
+  margin: 20px auto 0;
+  padding: 0 18px;
+  min-height: 100vh;
+  font-family: monospace;
+  gap: 20px;
+  overflow-x: hidden;
 }
-
-/* Sección superior - fondo transparente para heredar del contexto */
-.contenido-superior {
-  background-color: transparent;
-  padding: 20px;
+.texto-message {
+  width: 100%;
+  font-family: monospace;
+  color: #fff;
+  font-size: clamp(14px, 2.5vw, 20px);
+  margin-bottom: 20px;
+}
+.texto-color {
+  color: #ffdb9f;
+}
+.no-codes-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: clamp(16px, 3vw, 24px);
+  font-family: monospace;
+  color: #fff;
+  width: 100%;
+  min-height: 60px;
+  text-align: center;
+}
+.codes-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+.codes-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: clamp(6px, 1vh, 12px);
+  font-size: clamp(12px, 2vw, 18px);
+  border-radius: 0px;
+  border: 6px solid #ffa500;
+}
+.code-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: clamp(8px, 1vw, 14px);
+  background-color: var(--bg-light);
+  transition: all 0.18s ease;
+  box-sizing: border-box;
+  border-bottom: 2px solid #122037;
+}
+.code-item:last-child {
+  border-bottom: none;
+}
+.code-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  word-break: break-word;
+  align-items: flex-start;
+  text-align: left;
+}
+.code-number {
+  color: #000;
+  font-weight: bold;
+}
+.code-description {
+  color: #000;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  white-space: pre-wrap;
+}
+.code-item.activo .select-button {
+  background-color: var(--focus-green);
+  border-color: var(--focus-green);
+  color: var(--bg-light) !important;
+}
+.select-button {
+  background-color: #006ce0;
+  color: var(--bg-light) !important;
+  border: none;
+  padding: clamp(10px, 1.2vw, 14px) clamp(12px, 2.6vw, 18px);
+  border-radius: 6px;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: clamp(15px, 1.9vw, 18px);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  max-width: 180px;
   box-sizing: border-box;
 }
-
-/* 
- * Sección inferior - fondo #C9C8C7
- * Este color gris claro crea una separación visual clara y proporciona
- * un área distintiva para contenido de selección o información secundaria
- */
-.contenido-inferior {
-  background-color: #C9C8C7;
-  padding: 20px;
-  box-sizing: border-box;
-  min-height: 100px;
+/* Cambio: solo este botón usa el color de hover amarillo */
+.select-button:hover {
+  background-color: #228B22;
+  color: #228B22;
 }
-
-/* Responsive: ajustar padding en pantallas pequeñas */
-@media (max-width: 768px) {
-  .contenido-superior,
-  .contenido-inferior {
-    padding: 15px;
-  }
+.select-button:focus-visible {
+  cursor: none;
 }
-
-@media (max-width: 480px) {
-  .contenido-superior,
-  .contenido-inferior {
-    padding: 10px;
-  }
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-self: center;
+}
+.new-search-button {
+  background-color: #006ce0;
+  color: #a8a8a8;
+  border: none;
+  padding: clamp(8px, 2vh, 16px) clamp(16px, 4vw, 24px);
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: clamp(15px, 3vw, 22px);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  justify-content: center;
+}
+.new-search-button:hover {
+  background-color: #0052a8;
+  color: #a8a8a8;
+}
+.marca-wrapper {
+  justify-content: center;
+  align-self: center;
+}
+.popup-confirm {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #148c14;
+  font-size: clamp(20px, 4vw, 32px);
+  font-weight: bold;
+  font-family: monospace;
+  z-index: 9999;
+}
+.popup-confirm.error {
+  color: #ff4444;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
+
