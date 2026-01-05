@@ -11,9 +11,9 @@
 </template>
 
 <script setup>
-import Marca from './Marca.vue'
-import BotonLogin from './BotonLogin.vue'
-import BotonSobre from './BotonSobre.vue'
+import Marca from '@/components/Marca.vue'
+import BotonLogin from '@/components/BotonLogin.vue'
+import BotonSobre from '@/components/BotonSobre.vue'
 </script>
 
 <style scoped>

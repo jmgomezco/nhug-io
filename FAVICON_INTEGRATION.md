@@ -2,6 +2,15 @@
 
 Esta guía detalla cómo integrar favicons en un proyecto configurado con Vite, incluyendo la generación mediante scripts y su integración en el flujo de construcción.
 
+## Cambios Recientes (Enero 2026)
+
+**Versión actualizada**: El favicon ahora se genera dinámicamente desde `src/assets/logo.svg` en lugar de generarse desde texto con la fuente Audiowide. Esto proporciona:
+
+- ✅ Mayor consistencia con el logo del proyecto
+- ✅ Actualizaciones automáticas cuando se modifica el logo
+- ✅ Menos dependencias (ya no necesita `text-to-svg`)
+- ✅ Proceso de generación más simple y mantenible
+
 ## Tabla de Contenidos
 
 1. [Dependencias Requeridas](#1-dependencias-requeridas)
@@ -17,10 +26,10 @@ Esta guía detalla cómo integrar favicons en un proyecto configurado con Vite, 
 
 ### Instalación de Dependencias
 
-Para generar favicons dinámicamente, necesitas instalar las siguientes dependencias de desarrollo:
+Para generar favicons dinámicamente desde el logo.svg, necesitas instalar las siguientes dependencias de desarrollo:
 
 ```bash
-npm install --save-dev sharp text-to-svg to-ico @resvg/resvg-js
+npm install --save-dev sharp to-ico
 ```
 
 ### Descripción de las Dependencias
@@ -33,14 +42,6 @@ npm install --save-dev sharp text-to-svg to-ico @resvg/resvg-js
   - Soporte para múltiples formatos de imagen
   - Optimización automática
 
-#### `text-to-svg` (v3.1.5 o superior)
-- **Propósito**: Convierte texto en rutas SVG
-- **Uso**: Genera el texto "n" como SVG path para el favicon
-- **Características**:
-  - Soporte para fuentes TTF personalizadas
-  - Control preciso de posicionamiento y tamaño
-  - Generación de rutas vectoriales
-
 #### `to-ico` (v1.1.5 o superior)
 - **Propósito**: Convierte imágenes PNG a formato ICO
 - **Uso**: Combina múltiples tamaños PNG en un único archivo .ico
@@ -48,12 +49,12 @@ npm install --save-dev sharp text-to-svg to-ico @resvg/resvg-js
   - Soporte para múltiples tamaños en un solo archivo
   - Compatible con todos los navegadores
 
-#### `@resvg/resvg-js` (v2.6.2 o superior)
-- **Propósito**: Renderización de SVG
-- **Uso**: Alternativa para renderizar SVG si es necesario
-- **Características**:
-  - Renderización precisa de SVG
-  - Sin dependencias de navegador
+### Dependencias Opcionales (ya no necesarias)
+
+Las siguientes dependencias se usaban en versiones anteriores pero ya no son necesarias:
+
+- `text-to-svg`: Ya no se usa, el favicon se genera directamente desde logo.svg
+- `@resvg/resvg-js`: Ya no se usa, Sharp maneja la conversión SVG directamente
 
 ### Verificación de Instalación
 
@@ -161,64 +162,46 @@ import toIco from 'to-ico';
 import { readFile, writeFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import TextToSVG from 'text-to-svg';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 async function createFaviconSVG() {
-  const fontPath = join(__dirname, 'Audiowide-Regular.ttf');
+  // Read logo.svg from src/assets
+  const logoPath = join(__dirname, '..', 'src', 'assets', 'logo.svg');
   
-  // Check if font file exists
+  // Check if logo file exists
   try {
-    await readFile(fontPath);
+    const svgBuffer = await readFile(logoPath);
+    console.log('✓ Logo.svg loaded from src/assets');
+    return svgBuffer;
   } catch (error) {
-    throw new Error(`Font file not found at ${fontPath}`);
+    throw new Error(`Logo file not found at ${logoPath}: ${error.message}`);
   }
-  
-  const textToSVG = TextToSVG.loadSync(fontPath);
-  
-  // Generate the text path for "n" with Audiowide font
-  const textSVG = textToSVG.getSVG('n', {
-    x: 0,
-    y: 0,
-    fontSize: 180,
-    anchor: 'center',
-    attributes: { fill: '#ffffff' }
-  });
-  
-  // Extract path data
-  const pathMatch = textSVG.match(/<path[^>]*d="([^"]*)"[^>]*>/);
-  if (!pathMatch || !pathMatch[1]) {
-    throw new Error('Failed to extract path data');
-  }
-  const pathData = pathMatch[1];
-  
-  // Create minimalist SVG with pure black background and white "n"
-  const svg = `<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="128" cy="128" r="128" fill="#000000"/>
-  <g transform="translate(128, 158)">
-    <path d="${pathData}" fill="#ffffff"/>
-  </g>
-</svg>`;
-  
-  return Buffer.from(svg);
 }
 
 async function generateFavicon() {
   try {
-    console.log('Generating favicon...');
+    console.log('Generating favicon from src/assets/logo.svg...');
     
+    // Load the logo.svg from src/assets
     const svgBuffer = await createFaviconSVG();
-    await writeFile(join(__dirname, 'favicon.svg'), svgBuffer);
     
-    // Convert to PNG at different sizes
+    // Save a copy of the SVG for reference
+    await writeFile(join(__dirname, 'favicon.svg'), svgBuffer);
+    console.log('✓ Favicon SVG saved for reference');
+    
+    // Convert SVG to PNG at different sizes
     const sizes = [16, 32, 48];
     const pngBuffers = await Promise.all(
       sizes.map(size =>
-        sharp(svgBuffer).resize(size, size).png().toBuffer()
+        sharp(svgBuffer)
+          .resize(size, size)
+          .png()
+          .toBuffer()
       )
     );
+    console.log('✓ PNG files generated at sizes:', sizes.join(', '));
     
     // Convert PNGs to ICO
     const icoBuffer = await toIco(pngBuffers);
@@ -227,7 +210,8 @@ async function generateFavicon() {
     const outputPath = join(__dirname, '..', 'public', 'favicon.ico');
     await writeFile(outputPath, icoBuffer);
     
-    console.log('✓ Favicon generated successfully');
+    console.log('✓ Favicon generated successfully at public/favicon.ico');
+    console.log('✓ Favicon is now dynamically generated from src/assets/logo.svg');
   } catch (error) {
     console.error('Error generating favicon:', error);
     process.exit(1);
@@ -239,32 +223,33 @@ generateFavicon();
 
 ### Características del Favicon
 
-#### Diseño Minimalista
+#### Diseño Dinámico
 
-El favicon utiliza un diseño simple y eficiente:
+El favicon se genera dinámicamente desde el archivo `src/assets/logo.svg`:
 
-- **Fondo**: `#000000` (negro puro)
-- **Texto**: `#ffffff` (blanco puro)
-- **Fuente**: Audiowide (familia de fuentes moderna y legible)
-- **Letra**: "n" en minúscula
-- **Tamaño del círculo**: Máximo permitido (radio 128 en canvas 256x256)
+- **Fuente**: Logo del proyecto ubicado en `src/assets/logo.svg`
+- **Proceso**: El SVG original se convierte automáticamente a los tamaños requeridos
+- **Consistencia**: Cualquier cambio en el logo se reflejará automáticamente en el favicon
 
 #### Proceso de Generación
 
-1. **Carga de Fuente**: Lee la fuente `Audiowide-Regular.ttf` desde el directorio `scripts/`
-2. **Conversión de Texto a SVG**: Convierte la letra "n" en un path SVG
-3. **Creación de SVG**: Combina un círculo negro de fondo con el texto blanco centrado
-4. **Redimensionamiento**: Genera PNG en 3 tamaños (16x16, 32x32, 48x48)
-5. **Conversión a ICO**: Combina los PNG en un único archivo `.ico`
-6. **Guardado**: Escribe el archivo en `public/favicon.ico`
+1. **Carga del Logo**: Lee el archivo `logo.svg` desde el directorio `src/assets/`
+2. **Validación**: Verifica que el archivo SVG sea válido y esté completo
+3. **Redimensionamiento**: Genera PNG en 3 tamaños (16x16, 32x32, 48x48) usando Sharp
+4. **Conversión a ICO**: Combina los PNG en un único archivo `.ico` multi-resolución
+5. **Guardado**: Escribe el archivo en `public/favicon.ico` para ser servido por Vite
+6. **Referencia**: Guarda una copia del SVG en `scripts/favicon.svg` como referencia
 
-### Archivo de Fuente Requerido
+### Archivo de Logo Requerido
 
-El script requiere el archivo `scripts/Audiowide-Regular.ttf`. Este archivo debe estar presente en el directorio `scripts/` para que la generación funcione correctamente.
+El script requiere el archivo `src/assets/logo.svg`. Este archivo debe:
+- Estar presente en el directorio `src/assets/`
+- Ser un archivo SVG válido con etiquetas de apertura y cierre correctas
+- Tener contenido visual adecuado para ser convertido a favicon
 
-Si falta el archivo, el script arrojará un error claro:
+Si falta el archivo o está corrupto, el script arrojará un error claro:
 ```
-Font file not found at /path/to/scripts/Audiowide-Regular.ttf
+Logo file not found at /path/to/src/assets/logo.svg
 ```
 
 ---
@@ -472,18 +457,23 @@ nhug-io/
 
 #### `scripts/generate-favicon.js`
 - **Tipo**: Script Node.js (ES Module)
-- **Propósito**: Genera el favicon dinámicamente
+- **Propósito**: Genera el favicon dinámicamente desde src/assets/logo.svg
 - **Ejecución**: Parte del script de build
 
-#### `scripts/Audiowide-Regular.ttf`
-- **Tipo**: Archivo de fuente TrueType
-- **Propósito**: Fuente para generar el texto "n"
-- **Requerido**: Sí, el script falla sin él
+#### `src/assets/logo.svg`
+- **Tipo**: Archivo SVG (imagen vectorial)
+- **Propósito**: Logo principal del proyecto, fuente para el favicon
+- **Requerido**: Sí, el script de generación de favicon lo usa como entrada
 
 #### `scripts/favicon.svg`
 - **Generado por**: Script de generación
-- **Propósito**: Referencia visual del favicon
+- **Propósito**: Copia de referencia del logo usado para el favicon
 - **No usado**: En producción (solo referencia)
+
+#### `scripts/Audiowide-Regular.ttf` (obsoleto)
+- **Tipo**: Archivo de fuente TrueType
+- **Estado**: Ya no se usa en la versión actual
+- **Nota**: El favicon ahora se genera desde logo.svg, no desde texto
 
 ### Archivos Generados Durante el Build
 
@@ -506,29 +496,15 @@ Sharp es más rápido y eficiente que alternativas como ImageMagick o GraphicsMa
 
 ### ¿Puedo cambiar los colores del favicon?
 
-Sí, modifica los valores en `scripts/generate-favicon.js`:
+Sí, modifica el archivo `src/assets/logo.svg` directamente. Los cambios se reflejarán automáticamente en el favicon cuando ejecutes:
 
-```javascript
-// Cambiar colores en la función createFaviconSVG
-const svg = `<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="128" cy="128" r="128" fill="#000000"/>
-  <g transform="translate(128, 158)">
-    <path d="${pathData}" fill="#ffffff"/>
-  </g>
-</svg>`;
+```bash
+npm run generate-favicon
 ```
 
-El diseño actual utiliza:
-- Fondo: `#000000` (negro puro)
-- Texto: `#ffffff` (blanco puro)
+### ¿Puedo usar un diseño diferente para el favicon?
 
-### ¿Puedo usar otra fuente?
-
-Sí, reemplaza `Audiowide-Regular.ttf` con tu fuente y actualiza la ruta:
-
-```javascript
-const fontPath = join(__dirname, 'tu-fuente.ttf');
-```
+Sí, reemplaza o modifica `src/assets/logo.svg` con tu diseño personalizado. El favicon se generará automáticamente desde ese archivo.
 
 ### ¿Cómo actualizo el favicon en desarrollo?
 
@@ -541,7 +517,7 @@ Luego recarga la página en el navegador (puede requerir limpiar caché).
 
 ### ¿El favicon se regenera en cada build?
 
-Sí, el script `generate-favicon.js` se ejecuta automáticamente en cada `npm run build`.
+Sí, el script `generate-favicon.js` se ejecuta automáticamente en cada `npm run build`, leyendo siempre la versión más reciente de `src/assets/logo.svg`.
 
 ### ¿Puedo usar SVG directamente como favicon?
 
@@ -578,9 +554,25 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 
-### Fuente no encontrada
+### Logo SVG incompleto o corrupto
 
-Asegúrate de que `scripts/Audiowide-Regular.ttf` exista. Descárgala desde [Google Fonts](https://fonts.google.com/specimen/Audiowide) si falta.
+Si el archivo `src/assets/logo.svg` está incompleto o corrupto:
+
+```bash
+# Verifica que el archivo SVG tenga etiquetas de apertura y cierre correctas
+cat src/assets/logo.svg | grep "</svg>"
+
+# Si falta la etiqueta de cierre, agrégala manualmente
+```
+
+El error típico será:
+```
+Input buffer has corrupt header: XML parse error: Premature end of data in tag svg
+```
+
+### Fuente no encontrada (obsoleto)
+
+**Nota**: Las versiones actuales ya no usan fuentes TTF. Si ves un error sobre `Audiowide-Regular.ttf`, actualiza el script `generate-favicon.js` para usar `logo.svg` en su lugar.
 
 ---
 

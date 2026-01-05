@@ -1,6 +1,6 @@
 <script setup>
-import ContainerInicio from './components/ContainerInicio.vue'
-import ContainerSelect from './components/ContainerSelect.vue'
+import ContainerInicio from '@/components/ContainerInicio.vue'
+import ContainerSelect from '@/components/ContainerSelect.vue'
 </script>
 
 <template>

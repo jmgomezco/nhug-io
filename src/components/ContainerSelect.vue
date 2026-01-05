@@ -66,8 +66,8 @@
 
 <script setup>
 import { ref, onBeforeUnmount } from 'vue'
-import { API_BASE_URL } from '../constants.js'
-import Marca from './Marca.vue'
+import { API_BASE_URL } from '@/constants.js'
+import Marca from '@/components/Marca.vue'
 
 const props = defineProps({
   sessionId: { type: String, required: true },
