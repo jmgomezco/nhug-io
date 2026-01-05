@@ -47,11 +47,16 @@ async function generateFavicon() {
     // Convert PNGs to ICO
     const icoBuffer = await toIco(pngBuffers);
     
-    // Write to public folder
-    const outputPath = join(__dirname, '..', 'public', 'favicon.ico');
-    await writeFile(outputPath, icoBuffer);
-    
+    // Write to public folder (for Vite to serve)
+    const publicOutputPath = join(__dirname, '..', 'public', 'favicon.ico');
+    await writeFile(publicOutputPath, icoBuffer);
     console.log('✓ Favicon generated successfully at public/favicon.ico');
+    
+    // Write to src/assets folder as well
+    const assetsOutputPath = join(__dirname, '..', 'src', 'assets', 'favicon.ico');
+    await writeFile(assetsOutputPath, icoBuffer);
+    console.log('✓ Favicon copy saved at src/assets/favicon.ico');
+    
     console.log('✓ Favicon is now dynamically generated from src/assets/logo.svg');
   } catch (error) {
     console.error('Error generating favicon:', error);
