@@ -3,7 +3,7 @@
     <div class="contenido">
       <Marca />
       <div class="botones-grupo">
-        <LoginCognito />
+        <BotonLogin />
         <BotonSobre />
       </div>
     </div>
@@ -12,7 +12,7 @@
 
 <script setup>
 import Marca from './Marca.vue'
-import LoginCognito from './LoginCognito.vue'
+import BotonLogin from './BotonLogin.vue'
 import BotonSobre from './BotonSobre.vue'
 </script>
 
@@ -34,7 +34,7 @@ import BotonSobre from './BotonSobre.vue'
   margin: 0 auto;
 }
 
-/* Grupo de botones: LoginCognito y BotonSobre */
+/* Grupo de botones: BotonLogin y BotonSobre */
 .botones-grupo {
   display: flex;
   gap: 15px;

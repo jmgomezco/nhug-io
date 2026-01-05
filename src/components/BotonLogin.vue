@@ -10,9 +10,8 @@
 
 <script setup>
 // Componente de botón de login
-// Por ahora sin funcionalidad, se expandirá con Cognito en el futuro
 const handleLogin = () => {
-  // Placeholder para futura integración con AWS Cognito
+  // Placeholder para futura funcionalidad de login
   console.log('Login button clicked')
 }
 </script>
@@ -31,7 +30,7 @@ const handleLogin = () => {
   background-color: #122037;
   /* Borde blanco de 1px */
   border: 1px solid #FFFFFF;
-  /* Fuente comercial reconocida para aplicaciones de login */
+  /* Fuente profesional para aplicaciones de login */
   font-family: 'Roboto', 'Arial', 'Helvetica', sans-serif;
   font-size: 14px;
   font-weight: 500;
