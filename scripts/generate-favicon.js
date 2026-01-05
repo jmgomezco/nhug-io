@@ -57,7 +57,12 @@ async function generateFavicon() {
     await writeFile(assetsOutputPath, icoBuffer);
     console.log('✓ Favicon copy saved at src/assets/favicon.ico');
     
-    console.log('✓ Favicon is now dynamically generated from src/assets/logo.svg');
+    // Write to src/assets folder as logo.ico as well
+    const logoOutputPath = join(__dirname, '..', 'src', 'assets', 'logo.ico');
+    await writeFile(logoOutputPath, icoBuffer);
+    console.log('✓ Logo.ico generated at src/assets/logo.ico');
+    
+    console.log('✓ Favicon and logo.ico are now dynamically generated from src/assets/logo.svg');
   } catch (error) {
     console.error('Error generating favicon:', error);
     process.exit(1);

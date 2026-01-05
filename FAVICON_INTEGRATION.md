@@ -12,9 +12,10 @@ Esta guía detalla cómo integrar favicons en un proyecto configurado con Vite, 
 - ✅ Proceso de generación más simple y mantenible
 
 **Última actualización (Enero 5, 2026)**: 
-- ✅ El favicon ahora se genera en **DOS ubicaciones**: `src/assets/` y `public/`
+- ✅ El favicon ahora se genera en **TRES ubicaciones**: `src/assets/favicon.ico`, `src/assets/logo.ico` y `public/favicon.ico`
 - ✅ La generación ocurre automáticamente durante **desarrollo** (`npm run dev`) y **build** (`npm run build`)
 - ✅ `src/assets/favicon.ico` - Disponible en la carpeta de assets del proyecto
+- ✅ `src/assets/logo.ico` - Archivo logo.ico generado automáticamente desde logo.svg
 - ✅ `public/favicon.ico` - Servido por Vite y copiado a dist durante el build
 
 ## Tabla de Contenidos
@@ -222,7 +223,12 @@ async function generateFavicon() {
     await writeFile(assetsOutputPath, icoBuffer);
     console.log('✓ Favicon copy saved at src/assets/favicon.ico');
     
-    console.log('✓ Favicon is now dynamically generated from src/assets/logo.svg');
+    // Write to src/assets folder as logo.ico as well
+    const logoOutputPath = join(__dirname, '..', 'src', 'assets', 'logo.ico');
+    await writeFile(logoOutputPath, icoBuffer);
+    console.log('✓ Logo.ico generated at src/assets/logo.ico');
+    
+    console.log('✓ Favicon and logo.ico are now dynamically generated from src/assets/logo.svg');
   } catch (error) {
     console.error('Error generating favicon:', error);
     process.exit(1);
@@ -248,9 +254,10 @@ El favicon se genera dinámicamente desde el archivo `src/assets/logo.svg`:
 2. **Validación**: Verifica que el archivo SVG sea válido y esté completo
 3. **Redimensionamiento**: Genera PNG en 3 tamaños (16x16, 32x32, 48x48) usando Sharp
 4. **Conversión a ICO**: Combina los PNG en un único archivo `.ico` multi-resolución
-5. **Guardado Dual**: 
+5. **Guardado Triple**: 
    - Escribe el archivo en `public/favicon.ico` para ser servido por Vite
    - Escribe una copia en `src/assets/favicon.ico` para disponibilidad en el código fuente
+   - Escribe una copia en `src/assets/logo.ico` como logo.ico generado automáticamente
 6. **Referencia**: Guarda una copia del SVG en `scripts/favicon.svg` como referencia
 
 ### Archivo de Logo Requerido
@@ -457,6 +464,7 @@ nhug-io/
 ├── src/
 │   ├── assets/
 │   │   ├── favicon.ico       # Favicon generado en assets
+│   │   ├── logo.ico          # Logo.ico generado en assets
 │   │   └── logo.svg          # Logo fuente para el favicon
 │   └── main.js               # Punto de entrada de Vue
 ├── index.html                # HTML principal con <link> al favicon
@@ -479,9 +487,15 @@ nhug-io/
 - **Propósito**: Disponible en la carpeta de assets del proyecto
 - **Nota**: Esta es una copia del favicon en la carpeta de assets como fue solicitado
 
+#### `src/assets/logo.ico`
+- **Generado por**: `scripts/generate-favicon.js`
+- **Formato**: ICO multi-resolución (16x16, 32x32, 48x48) - idéntico a favicon.ico
+- **Propósito**: Archivo logo.ico generado automáticamente desde logo.svg
+- **Nota**: Este archivo se genera automáticamente durante el proceso de build/dev
+
 #### `scripts/generate-favicon.js`
 - **Tipo**: Script Node.js (ES Module)
-- **Propósito**: Genera el favicon dinámicamente desde src/assets/logo.svg
+- **Propósito**: Genera el favicon y logo.ico dinámicamente desde src/assets/logo.svg
 - **Ejecución**: Se ejecuta automáticamente durante `npm run dev` y `npm run build`
 
 #### `src/assets/logo.svg`
