@@ -72,11 +72,11 @@ async function generateFavicon() {
     // Convert PNGs to ICO
     const icoBuffer = await toIco(pngBuffers);
     
-    // Write to public folder
-    const outputPath = join(__dirname, '..', 'public', 'favicon.ico');
+    // Write to src/assets folder
+    const outputPath = join(__dirname, '..', 'src', 'assets', 'favicon.ico');
     await writeFile(outputPath, icoBuffer);
     
-    console.log('✓ Favicon generated successfully at public/favicon.ico');
+    console.log('✓ Favicon generated successfully at src/assets/favicon.ico');
   } catch (error) {
     console.error('Error generating favicon:', error);
     process.exit(1);
