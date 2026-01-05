@@ -223,11 +223,11 @@ async function generateFavicon() {
     // Convert PNGs to ICO
     const icoBuffer = await toIco(pngBuffers);
     
-    // Write to public folder
-    const outputPath = join(__dirname, '..', 'public', 'favicon.ico');
+    // Write to src/assets folder
+    const outputPath = join(__dirname, '..', 'src', 'assets', 'favicon.ico');
     await writeFile(outputPath, icoBuffer);
     
-    console.log('✓ Favicon generated successfully');
+    console.log('✓ Favicon generated successfully at src/assets/favicon.ico');
   } catch (error) {
     console.error('Error generating favicon:', error);
     process.exit(1);
@@ -256,7 +256,7 @@ El favicon utiliza un diseño simple y eficiente:
 3. **Creación de SVG**: Combina un círculo negro de fondo con el texto blanco centrado
 4. **Redimensionamiento**: Genera PNG en 3 tamaños (16x16, 32x32, 48x48)
 5. **Conversión a ICO**: Combina los PNG en un único archivo `.ico`
-6. **Guardado**: Escribe el archivo en `public/favicon.ico`
+6. **Guardado**: Escribe el archivo en `src/assets/favicon.ico`
 
 ### Archivo de Fuente Requerido
 
@@ -302,7 +302,7 @@ Vite tiene un comportamiento especial con la carpeta `public/`:
 - **Durante el build**: Los archivos se copian al directorio `dist/`
 - **Sin procesamiento**: Los archivos no pasan por el pipeline de Vite
 
-Por lo tanto, `public/favicon.ico` estará disponible en `/favicon.ico` tanto en desarrollo como en producción.
+Cuando se utiliza `src/assets/favicon.ico`, Vite procesa el archivo como un asset y lo incluye en el build con un hash de contenido para cache busting. La ruta se transforma automáticamente a `/assets/favicon-[hash].ico` en producción.
 
 ### index.html
 
@@ -313,7 +313,7 @@ Asegúrate de que tu `index.html` tenga la referencia al favicon:
 <html lang="">
   <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" href="/src/assets/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vite App</title>
   </head>
@@ -381,11 +381,11 @@ npm run dev
 npm run build
 ```
 - **Paso 1**: Ejecuta `node scripts/generate-favicon.js`
-  - Genera `favicon.ico` en `public/`
+  - Genera `favicon.ico` en `src/assets/`
   - Crea archivos SVG de referencia en `scripts/`
 - **Paso 2**: Ejecuta `vite build`
   - Compila el código Vue
-  - Copia `public/favicon.ico` a `dist/`
+  - Procesa `src/assets/favicon.ico` y lo copia a `dist/assets/` con hash de contenido
   - Genera los bundles optimizados
 
 #### Generar Solo Favicon
@@ -423,8 +423,8 @@ Es **crítico** que el script de generación de favicon se ejecute **antes** del
 ```
 
 **¿Por qué?**
-- El favicon debe existir en `public/` antes de que Vite lo copie a `dist/`
-- Si se ejecutara después, el favicon no estaría disponible en el build
+- El favicon debe existir en `src/assets/` antes de que Vite lo procese
+- Vite transformará la referencia en `index.html` y copiará el archivo a `dist/assets/` con un hash
 - El operador `&&` asegura ejecución secuencial (el segundo comando solo se ejecuta si el primero tiene éxito)
 
 ### Manejo de Errores
@@ -450,12 +450,13 @@ catch (error) {
 ```
 nhug-io/
 ├── public/
-│   └── favicon.ico           # Favicon generado (copiado a dist/)
 ├── scripts/
 │   ├── generate-favicon.js   # Script de generación
 │   ├── Audiowide-Regular.ttf # Fuente para el texto
 │   └── favicon.svg           # SVG generado (referencia)
 ├── src/
+│   ├── assets/
+│   │   └── favicon.ico       # Favicon generado (procesado por Vite)
 │   └── main.js               # Punto de entrada de Vue
 ├── index.html                # HTML principal con <link> al favicon
 ├── package.json              # Scripts y dependencias
@@ -465,10 +466,10 @@ nhug-io/
 
 ### Archivos Críticos
 
-#### `public/favicon.ico`
+#### `src/assets/favicon.ico`
 - **Generado por**: `scripts/generate-favicon.js`
 - **Formato**: ICO multi-resolución (16x16, 32x32, 48x48)
-- **Destino**: Copiado a `dist/favicon.ico` durante el build
+- **Destino**: Procesado por Vite y copiado a `dist/assets/favicon-[hash].ico` durante el build
 
 #### `scripts/generate-favicon.js`
 - **Tipo**: Script Node.js (ES Module)
@@ -490,8 +491,8 @@ nhug-io/
 ```
 dist/
 ├── index.html
-├── favicon.ico               # Copiado desde public/
 └── assets/
+    ├── favicon-[hash].ico    # Procesado desde src/assets/
     ├── index-[hash].css
     └── index-[hash].js
 ```
@@ -563,8 +564,8 @@ Sí, pero el soporte de navegadores es limitado. ICO tiene mejor compatibilidad,
 ### El favicon no aparece en el navegador
 
 1. Limpia el caché del navegador (Ctrl+Shift+R o Cmd+Shift+R)
-2. Verifica que `public/favicon.ico` exista
-3. Verifica que `index.html` tenga `<link rel="icon" href="/favicon.ico">`
+2. Verifica que `src/assets/favicon.ico` exista
+3. Verifica que `index.html` tenga `<link rel="icon" href="/src/assets/favicon.ico">`
 4. Verifica la consola del navegador por errores 404
 
 ### Error de compilación de Sharp
