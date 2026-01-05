@@ -10,9 +10,8 @@
 
 <script setup>
 // Componente de botón de login
-// Por ahora sin funcionalidad, se expandirá con Cognito en el futuro
 const handleLogin = () => {
-  // Placeholder para futura integración con AWS Cognito
+  // Placeholder para futura funcionalidad de login
   console.log('Login button clicked')
 }
 </script>
