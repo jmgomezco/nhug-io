@@ -2,17 +2,13 @@
   <div class="container-inicio">
     <div class="contenido">
       <Marca />
-      <div class="botones-grupo">
-        <BotonLogin />
-        <BotonSobre />
-      </div>
+      <BotonSobre />
     </div>
   </div>
 </template>
 
 <script setup>
 import Marca from '@/components/Marca.vue'
-import BotonLogin from '@/components/BotonLogin.vue'
 import BotonSobre from '@/components/BotonSobre.vue'
 </script>
 
@@ -34,31 +30,16 @@ import BotonSobre from '@/components/BotonSobre.vue'
   margin: 0 auto;
 }
 
-/* Grupo de botones: BotonLogin y BotonSobre */
-.botones-grupo {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
 /* Responsive: en pantallas pequeñas, mantener el diseño horizontal pero ajustar espaciado */
 @media (max-width: 768px) {
   .container-inicio {
     padding: 15px;
-  }
-  
-  .botones-grupo {
-    gap: 12px;
   }
 }
 
 @media (max-width: 480px) {
   .container-inicio {
     padding: 10px;
-  }
-  
-  .botones-grupo {
-    gap: 10px;
   }
 }
 </style>

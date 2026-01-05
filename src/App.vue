@@ -1,10 +1,15 @@
 <script setup>
 import ContainerInicio from '@/components/ContainerInicio.vue'
+import ContainerTexto from '@/components/ContainerTexto.vue'
 import ContainerSelect from '@/components/ContainerSelect.vue'
 </script>
 
 <template>
   <ContainerInicio />
+  <ContainerTexto 
+    titulo="Bienvenido a NHUG.io"
+    texto="Esta es una aplicación de ejemplo que utiliza Vue 3 y Vite. Explora las funcionalidades disponibles."
+  />
   <ContainerSelect>
     <template #superior>
       <h2 class="titulo-superior">Sección Superior</h2>
