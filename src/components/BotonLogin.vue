@@ -30,7 +30,7 @@ const handleLogin = () => {
   background-color: #122037;
   /* Borde blanco de 1px */
   border: 1px solid #FFFFFF;
-  /* Fuente comercial reconocida para aplicaciones de login */
+  /* Fuente profesional para aplicaciones de login */
   font-family: 'Roboto', 'Arial', 'Helvetica', sans-serif;
   font-size: 14px;
   font-weight: 500;
